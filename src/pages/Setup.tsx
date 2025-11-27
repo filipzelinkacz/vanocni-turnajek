@@ -6,9 +6,10 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Snowflake, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { TournamentFormat, Team } from '@/types/tournament';
 import { toast } from 'sonner';
+import marketupLogo from '@/assets/marketup-logo.png';
 
 const Setup = () => {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ const Setup = () => {
     <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
-          <Snowflake className="w-10 h-10 text-accent" />
+          <img src={marketupLogo} alt="Marketup" className="w-12 h-12" />
           <h1 className="text-4xl font-bold text-primary">Vytvořit turnaj</h1>
         </div>
 
