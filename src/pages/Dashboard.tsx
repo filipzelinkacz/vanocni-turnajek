@@ -1,11 +1,12 @@
 import { useTournament } from '@/contexts/TournamentContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Maximize2, Snowflake } from 'lucide-react';
+import { Maximize2 } from 'lucide-react';
 import { StandingsTable } from '@/components/StandingsTable';
 import { RecentMatches } from '@/components/RecentMatches';
-import { LiveMatch } from '@/components/LiveMatch';
 import { UpcomingMatches } from '@/components/UpcomingMatches';
+import { GoalStats } from '@/components/GoalStats';
+import marketupLogo from '@/assets/marketup-logo.png';
 
 const Dashboard = () => {
   const { tournament } = useTournament();
@@ -18,7 +19,7 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-secondary">
         <Card className="p-12 text-center max-w-lg">
-          <Snowflake className="w-16 h-16 mx-auto mb-6 text-accent animate-pulse" />
+          <img src={marketupLogo} alt="Marketup" className="w-24 h-24 mx-auto mb-6" />
           <h1 className="text-4xl font-bold mb-4 text-primary">Vánoční Fotbálek</h1>
           <p className="text-muted-foreground mb-8 text-lg">
             Vytvořte turnaj pro zahájení zápasů
@@ -35,9 +36,9 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-3">
-            <Snowflake className="w-10 h-10 text-accent" />
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <img src={marketupLogo} alt="Marketup" className="w-16 h-16" />
             <div>
               <h1 className="text-4xl font-bold text-primary">{tournament.name}</h1>
               <p className="text-muted-foreground">
@@ -50,20 +51,29 @@ const Dashboard = () => {
             Celá obrazovka
           </Button>
         </div>
+        
+        <Card className="p-4 bg-accent/10 border-accent/20">
+          <p className="text-sm font-medium text-center">
+            <span className="font-bold">Bodový systém:</span> Výhra = 1 bod | Pořadí dle: 1. počet bodů, 2. rozdíl skóre
+          </p>
+        </Card>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto grid gap-6 lg:grid-cols-3">
-        {/* Left Column - Standings */}
-        <div className="lg:col-span-2 space-y-6">
-          <StandingsTable />
-          <RecentMatches />
-        </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <GoalStats />
+        
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Left Column - Standings */}
+          <div className="lg:col-span-2 space-y-6">
+            <StandingsTable />
+            <RecentMatches />
+          </div>
 
-        {/* Right Column - Live & Upcoming */}
-        <div className="space-y-6">
-          {tournament && <LiveMatch />}
-          <UpcomingMatches />
+          {/* Right Column - Upcoming */}
+          <div className="space-y-6">
+            <UpcomingMatches />
+          </div>
         </div>
       </div>
     </div>

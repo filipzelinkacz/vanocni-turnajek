@@ -18,7 +18,6 @@ const Scores = () => {
   }
 
   const scheduledMatches = tournament.matches.filter(m => m.status === 'scheduled');
-  const liveMatches = tournament.matches.filter(m => m.status === 'live');
   const finishedMatches = tournament.matches.filter(m => m.status === 'finished');
 
   return (
@@ -33,12 +32,9 @@ const Scores = () => {
         </div>
 
         <Tabs defaultValue="scheduled" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="scheduled">
               Naplánované ({scheduledMatches.length})
-            </TabsTrigger>
-            <TabsTrigger value="live">
-              Probíhající ({liveMatches.length})
             </TabsTrigger>
             <TabsTrigger value="finished">
               Dokončené ({finishedMatches.length})
@@ -52,18 +48,6 @@ const Scores = () => {
               </Card>
             ) : (
               scheduledMatches.map(match => (
-                <MatchCard key={match.id} match={match} />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="live" className="space-y-4">
-            {liveMatches.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-muted-foreground">Žádné probíhající zápasy</p>
-              </Card>
-            ) : (
-              liveMatches.map(match => (
                 <MatchCard key={match.id} match={match} />
               ))
             )}

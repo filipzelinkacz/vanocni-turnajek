@@ -108,11 +108,11 @@ export function calculateStandings(teams: Team[], matches: Match[]): TeamStats[]
 
       if (match.scoreA > match.scorB) {
         teamA.won++;
-        teamA.points += 3;
+        teamA.points += 1;
         teamB.lost++;
       } else if (match.scorB > match.scoreA) {
         teamB.won++;
-        teamB.points += 3;
+        teamB.points += 1;
         teamA.lost++;
       }
     });
