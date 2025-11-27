@@ -1,8 +1,8 @@
 import { useTournament } from '@/contexts/TournamentContext';
 import { Card } from '@/components/ui/card';
-import { Snowflake } from 'lucide-react';
 import { MatchCard } from '@/components/MatchCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import marketupLogo from '@/assets/marketup-logo.png';
 
 const Scores = () => {
   const { tournament } = useTournament();
@@ -24,7 +24,7 @@ const Scores = () => {
     <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
-          <Snowflake className="w-10 h-10 text-accent" />
+          <img src={marketupLogo} alt="Marketup" className="w-12 h-12" />
           <div>
             <h1 className="text-4xl font-bold text-primary">Zadávat skóre</h1>
             <p className="text-muted-foreground">{tournament.name}</p>
