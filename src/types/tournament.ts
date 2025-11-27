@@ -1,6 +1,6 @@
 export type TournamentFormat = 'round-robin' | 'two-groups';
 
-export type MatchStatus = 'scheduled' | 'live' | 'finished';
+export type MatchStatus = 'scheduled' | 'finished';
 
 export interface Player {
   name: string;

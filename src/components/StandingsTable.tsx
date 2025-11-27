@@ -9,6 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export const StandingsTable = () => {
   const { standings, getTeamById } = useTournament();
@@ -20,20 +26,56 @@ export const StandingsTable = () => {
         <h2 className="text-2xl font-bold text-primary">Průběžná tabulka</h2>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">#</TableHead>
-            <TableHead>Tým</TableHead>
-            <TableHead className="text-center">Z</TableHead>
-            <TableHead className="text-center">V</TableHead>
-            <TableHead className="text-center">P</TableHead>
-            <TableHead className="text-center">GS</TableHead>
-            <TableHead className="text-center">GA</TableHead>
-            <TableHead className="text-center">GD</TableHead>
-            <TableHead className="text-center font-bold">Body</TableHead>
-          </TableRow>
-        </TableHeader>
+      <TooltipProvider>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">#</TableHead>
+              <TableHead>Tým</TableHead>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TableHead className="text-center cursor-help">Z</TableHead>
+                </TooltipTrigger>
+                <TooltipContent>Zápasy odehrané</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TableHead className="text-center cursor-help">V</TableHead>
+                </TooltipTrigger>
+                <TooltipContent>Výhry</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TableHead className="text-center cursor-help">P</TableHead>
+                </TooltipTrigger>
+                <TooltipContent>Prohry</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TableHead className="text-center cursor-help">GS</TableHead>
+                </TooltipTrigger>
+                <TooltipContent>Góly vstřelené</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TableHead className="text-center cursor-help">GA</TableHead>
+                </TooltipTrigger>
+                <TooltipContent>Góly obdržené</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TableHead className="text-center cursor-help">GD</TableHead>
+                </TooltipTrigger>
+                <TooltipContent>Rozdíl skóre</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TableHead className="text-center font-bold cursor-help">Body</TableHead>
+                </TooltipTrigger>
+                <TooltipContent>Body (1 za výhru)</TooltipContent>
+              </Tooltip>
+            </TableRow>
+          </TableHeader>
         <TableBody>
           {standings.map((stat, index) => {
             const team = getTeamById(stat.teamId);
@@ -74,7 +116,8 @@ export const StandingsTable = () => {
             );
           })}
         </TableBody>
-      </Table>
+        </Table>
+      </TooltipProvider>
 
       {standings.length === 0 && (
         <p className="text-center text-muted-foreground py-8">

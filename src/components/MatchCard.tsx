@@ -4,7 +4,7 @@ import { Match } from '@/types/tournament';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Play, Save, Edit2 } from 'lucide-react';
+import { Save, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -23,21 +23,15 @@ interface MatchCardProps {
 }
 
 export const MatchCard = ({ match }: MatchCardProps) => {
-  const { getTeamById, updateMatchScore, startMatch, finishMatch } = useTournament();
+  const { getTeamById, updateMatchScore, finishMatch } = useTournament();
   const [scoreA, setScoreA] = useState(match.scoreA.toString());
   const [scoreB, setScoreB] = useState(match.scorB.toString());
-  const [isEditing, setIsEditing] = useState(match.status === 'live');
+  const [isEditing, setIsEditing] = useState(match.status === 'scheduled');
 
   const teamA = getTeamById(match.teamAId);
   const teamB = getTeamById(match.teamBId);
 
   if (!teamA || !teamB) return null;
-
-  const handleStart = () => {
-    startMatch(match.id);
-    setIsEditing(true);
-    toast.success('Zápas zahájen');
-  };
 
   const handleSave = () => {
     const numA = parseInt(scoreA);
@@ -129,16 +123,9 @@ export const MatchCard = ({ match }: MatchCardProps) => {
       {/* Actions */}
       <div className="mt-6 flex justify-center gap-3">
         {match.status === 'scheduled' && (
-          <Button onClick={handleStart} className="bg-success hover:bg-success/90">
-            <Play className="w-4 h-4 mr-2" />
-            Začít zápas
-          </Button>
-        )}
-
-        {isEditing && (
           <Button onClick={handleSave} className="bg-accent hover:bg-accent/90">
             <Save className="w-4 h-4 mr-2" />
-            Uložit a dokončit
+            Uložit skóre
           </Button>
         )}
 

@@ -6,13 +6,11 @@ interface TournamentContextType {
   tournament: Tournament | null;
   createTournament: (name: string, format: TournamentFormat, teams: Team[]) => void;
   updateMatchScore: (matchId: string, scoreA: number, scoreB: number) => void;
-  startMatch: (matchId: string) => void;
   finishMatch: (matchId: string) => void;
   getTeamById: (teamId: string) => Team | undefined;
   standings: TeamStats[];
   recentMatches: Match[];
   upcomingMatches: Match[];
-  liveMatch: Match | null;
 }
 
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
@@ -64,19 +62,6 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const startMatch = (matchId: string) => {
-    if (!tournament) return;
-    
-    setTournament({
-      ...tournament,
-      matches: tournament.matches.map(match =>
-        match.id === matchId
-          ? { ...match, status: 'live' as const }
-          : match
-      ),
-    });
-  };
-
   const finishMatch = (matchId: string) => {
     if (!tournament) return;
     
@@ -110,23 +95,17 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         .slice(0, 3)
     : [];
 
-  const liveMatch = tournament
-    ? tournament.matches.find(m => m.status === 'live') || null
-    : null;
-
   return (
     <TournamentContext.Provider
       value={{
         tournament,
         createTournament,
         updateMatchScore,
-        startMatch,
         finishMatch,
         getTeamById,
         standings,
         recentMatches,
         upcomingMatches,
-        liveMatch,
       }}
     >
       {children}
