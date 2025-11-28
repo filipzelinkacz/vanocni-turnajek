@@ -20,6 +20,9 @@ interface TournamentContextType {
   endTournamentEarly: () => void;
   startPlayoff: () => void;
   canStartPlayoff: boolean;
+  advanceToFinals: () => void;
+  canAdvanceToFinals: boolean;
+  isTournamentFinished: boolean;
 }
 
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
@@ -176,6 +179,18 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
       tournament.matches.filter(m => !m.group || m.group === 'A' || m.group === 'B').every(m => m.status === 'finished')
     : false;
 
+  const canAdvanceToFinals = tournament
+    ? tournament.phase === 'playoff' &&
+      tournament.matches.filter(m => m.group === 'semifinal').every(m => m.status === 'finished') &&
+      tournament.matches.find(m => m.group === 'final')?.teamAId === ''
+    : false;
+
+  const isTournamentFinished = tournament
+    ? tournament.phase === 'playoff' &&
+      tournament.matches.find(m => m.group === 'final')?.status === 'finished' &&
+      tournament.matches.find(m => m.group === 'third-place')?.status === 'finished'
+    : false;
+
   const startPlayoff = () => {
     if (!tournament || !canStartPlayoff) return;
 
@@ -240,6 +255,39 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const advanceToFinals = () => {
+    if (!tournament || !canAdvanceToFinals) return;
+
+    const semifinalMatches = tournament.matches.filter(m => m.group === 'semifinal');
+    const semi1 = semifinalMatches[0];
+    const semi2 = semifinalMatches[1];
+
+    if (!semi1 || !semi2) return;
+
+    // Determine winners and losers
+    const semi1Winner = semi1.scoreA > semi1.scorB ? semi1.teamAId : semi1.teamBId;
+    const semi1Loser = semi1.scoreA > semi1.scorB ? semi1.teamBId : semi1.teamAId;
+    const semi2Winner = semi2.scoreA > semi2.scorB ? semi2.teamAId : semi2.teamBId;
+    const semi2Loser = semi2.scoreA > semi2.scorB ? semi2.teamBId : semi2.teamAId;
+
+    setTournament(prev => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        matches: prev.matches.map(m => {
+          if (m.group === 'third-place') {
+            return { ...m, teamAId: semi1Loser, teamBId: semi2Loser };
+          }
+          if (m.group === 'final') {
+            return { ...m, teamAId: semi1Winner, teamBId: semi2Winner };
+          }
+          return m;
+        }),
+      };
+    });
+  };
+
   return (
     <TournamentContext.Provider
       value={{
@@ -260,6 +308,9 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         endTournamentEarly,
         startPlayoff,
         canStartPlayoff,
+        advanceToFinals,
+        canAdvanceToFinals,
+        isTournamentFinished,
       }}
     >
       {children}
