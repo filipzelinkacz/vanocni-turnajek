@@ -42,7 +42,7 @@ const Dashboard = () => {
             Vytvořte turnaj pro zahájení zápasů
           </p>
           <Button asChild size="lg" className="bg-accent hover:bg-accent/90">
-            <a href="/setup">Vytvořit turnaj</a>
+            <a href="/">Vytvořit turnaj</a>
           </Button>
         </Card>
       </div>
