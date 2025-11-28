@@ -22,7 +22,13 @@ export const Navigation = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b-2 border-primary/20 shadow-lg">
       <div className="max-w-7xl mx-auto px-6 py-3 flex gap-2 items-center justify-between">
-        <img src={marketupLogo} alt="Marketup" className="w-10 h-10" />
+        <div className="relative">
+          <img 
+            src={marketupLogo} 
+            alt="Marketup" 
+            className="w-10 h-10 rounded-full border-2 border-primary shadow-lg"
+          />
+        </div>
         
         <div className="flex gap-2 items-center">
           <NavLink
@@ -83,10 +89,10 @@ export const Navigation = () => {
             onClick={toggleChristmas}
             variant="ghost"
             size="icon"
-            className={`rounded-full transition-colors ${christmasMode ? 'bg-accent/20 text-accent' : 'hover:bg-accent/10'}`}
+            className={`rounded-full transition-colors ${christmasMode ? 'bg-gradient-to-br from-accent via-success to-winter-blue text-white' : 'hover:bg-accent/10'}`}
             title={christmasMode ? 'Vypnout vánoční animace' : 'Zapnout vánoční animace'}
           >
-            <Snowflake className="w-5 h-5" />
+            <Snowflake className={`w-5 h-5 ${christmasMode ? 'animate-pulse' : 'text-accent'}`} />
           </Button>
         </div>
       </div>
