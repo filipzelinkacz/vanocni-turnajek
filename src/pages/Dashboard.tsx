@@ -52,8 +52,8 @@ const Dashboard = () => {
           </Button>
         </div>
         
-        <Card className="p-4 bg-accent/10 border-accent/20">
-          <p className="text-sm font-medium text-center">
+        <Card className="p-4 bg-success/10 border-success/20">
+          <p className="text-sm font-medium text-center text-success">
             <span className="font-bold">Bodový systém:</span> Výhra = 1 bod | Pořadí dle: 1. počet bodů, 2. rozdíl skóre
           </p>
         </Card>
@@ -61,8 +61,6 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto space-y-6">
-        <GoalStats />
-        
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Column - Standings */}
           <div className="lg:col-span-2 space-y-6">
@@ -75,6 +73,8 @@ const Dashboard = () => {
             <UpcomingMatches />
           </div>
         </div>
+        
+        <GoalStats />
       </div>
     </div>
   );

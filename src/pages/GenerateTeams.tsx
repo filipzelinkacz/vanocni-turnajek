@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Shuffle, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, Shuffle, ArrowRight, PartyPopper, RefreshCw } from 'lucide-react';
 import { PlayerWithSkill, SkillLevel, GeneratedTeam } from '@/types/player';
 import { generateBalancedTeams, getSkillLevelLabel, getSkillLevelColor } from '@/lib/team-generator';
 import { toast } from 'sonner';
@@ -22,6 +22,8 @@ const GenerateTeams = () => {
   ]);
   
   const [generatedTeams, setGeneratedTeams] = useState<GeneratedTeam[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentAnimationIndex, setCurrentAnimationIndex] = useState(-1);
 
   const addPlayer = () => {
     setPlayers([...players, { id: crypto.randomUUID(), name: '', skillLevel: 2 }]);
@@ -39,7 +41,7 @@ const GenerateTeams = () => {
     setPlayers(players.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const validPlayers = players.filter(p => p.name.trim());
     
     if (validPlayers.length < 4) {
@@ -59,12 +61,50 @@ const GenerateTeams = () => {
     }
     
     try {
+      setIsGenerating(true);
+      setCurrentAnimationIndex(-1);
       const teams = generateBalancedTeams(validPlayers);
-      setGeneratedTeams(teams);
-      toast.success('Týmy vygenerovány!');
+      
+      // Animate team generation
+      for (let i = 0; i < teams.length; i++) {
+        setCurrentAnimationIndex(i);
+        setGeneratedTeams(teams.slice(0, i + 1));
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+      
+      setIsGenerating(false);
+      setCurrentAnimationIndex(-1);
+      toast.success('Týmy vygenerovány!', {
+        icon: '🎉',
+      });
     } catch (error) {
+      setIsGenerating(false);
       toast.error('Chyba při generování týmů');
     }
+  };
+
+  const swapPlayers = (team1Id: string, team2Id: string) => {
+    setGeneratedTeams(generatedTeams.map(team => {
+      if (team.id === team1Id) {
+        const otherTeam = generatedTeams.find(t => t.id === team2Id);
+        if (!otherTeam) return team;
+        return {
+          ...team,
+          player2: otherTeam.player2,
+          averageSkill: (team.player1.skillLevel + otherTeam.player2.skillLevel) / 2,
+        };
+      }
+      if (team.id === team2Id) {
+        const otherTeam = generatedTeams.find(t => t.id === team1Id);
+        if (!otherTeam) return team;
+        return {
+          ...team,
+          player2: otherTeam.player2,
+          averageSkill: (team.player1.skillLevel + otherTeam.player2.skillLevel) / 2,
+        };
+      }
+      return team;
+    }));
   };
 
   const updateTeamName = (teamId: string, name: string) => {
@@ -111,26 +151,27 @@ const GenerateTeams = () => {
               </Button>
             </div>
 
-            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
               {players.map((player, index) => (
-                <Card key={player.id} className="p-3">
-                  <div className="flex gap-3 items-end">
-                    <div className="flex-1 space-y-2">
+                <Card key={player.id} className="p-2">
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-1">
                       <Label className="text-xs">Hráč {index + 1}</Label>
                       <Input
                         placeholder="Jméno hráče"
                         value={player.name}
                         onChange={(e) => updatePlayer(player.id, 'name', e.target.value)}
+                        className="h-9"
                       />
                     </div>
                     
-                    <div className="w-48 space-y-2">
+                    <div className="w-44 space-y-1">
                       <Label className="text-xs">Úroveň</Label>
                       <Select
                         value={player.skillLevel.toString()}
                         onValueChange={(v) => updatePlayer(player.id, 'skillLevel', parseInt(v) as SkillLevel)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-9">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -145,7 +186,7 @@ const GenerateTeams = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => removePlayer(player.id)}
-                      className="text-destructive"
+                      className="text-destructive h-9 w-9"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -158,9 +199,10 @@ const GenerateTeams = () => {
               onClick={handleGenerate} 
               className="w-full mt-4 bg-accent hover:bg-accent/90"
               size="lg"
+              disabled={isGenerating}
             >
-              <Shuffle className="w-5 h-5 mr-2" />
-              Vygenerovat vyvážené týmy
+              <Shuffle className={`w-5 h-5 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
+              {isGenerating ? 'Generuji týmy...' : 'Vygenerovat vyvážené týmy'}
             </Button>
           </Card>
 
@@ -186,46 +228,75 @@ const GenerateTeams = () => {
               </div>
             ) : (
               <>
-                <div className="space-y-3 max-h-[550px] overflow-y-auto pr-2">
-                  {generatedTeams.map((team, index) => (
-                    <Card key={team.id} className="p-4 bg-card/50">
-                      <div className="space-y-2">
-                        <Input
-                          value={team.name}
-                          onChange={(e) => updateTeamName(team.id, e.target.value)}
-                          className="font-semibold text-lg"
-                        />
-                        
-                        <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="space-y-2 max-h-[550px] overflow-y-auto pr-2">
+                  {generatedTeams.map((team, index) => {
+                    const isAnimating = index === currentAnimationIndex;
+                    return (
+                      <Card 
+                        key={team.id} 
+                        className={`p-3 transition-all duration-500 ${
+                          isAnimating 
+                            ? 'bg-success/20 border-success scale-105 shadow-lg' 
+                            : 'bg-card/50'
+                        }`}
+                      >
+                        <div className="space-y-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Hráč 1:</span>
-                            <span className="font-medium">{team.player1.name}</span>
-                            <span className={`text-xs ${getSkillLevelColor(team.player1.skillLevel)}`}>
-                              ({getSkillLevelLabel(team.player1.skillLevel)})
-                            </span>
+                            <Input
+                              value={team.name}
+                              onChange={(e) => updateTeamName(team.id, e.target.value)}
+                              className="font-semibold flex-1 h-9"
+                            />
+                            {isAnimating && (
+                              <PartyPopper className="w-5 h-5 text-success animate-bounce" />
+                            )}
                           </div>
                           
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Hráč 2:</span>
-                            <span className="font-medium">{team.player2.name}</span>
-                            <span className={`text-xs ${getSkillLevelColor(team.player2.skillLevel)}`}>
-                              ({getSkillLevelLabel(team.player2.skillLevel)})
-                            </span>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="space-y-1">
+                              <div className="text-xs text-muted-foreground">Hráč 1:</div>
+                              <div className="font-medium">{team.player1.name}</div>
+                              <span className={`text-xs ${getSkillLevelColor(team.player1.skillLevel)}`}>
+                                {getSkillLevelLabel(team.player1.skillLevel)}
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <div className="text-xs text-muted-foreground">Hráč 2:</div>
+                              <div className="font-medium">{team.player2.name}</div>
+                              <span className={`text-xs ${getSkillLevelColor(team.player2.skillLevel)}`}>
+                                {getSkillLevelLabel(team.player2.skillLevel)}
+                              </span>
+                            </div>
                           </div>
+                          
+                          {!isGenerating && generatedTeams.length > 1 && (
+                            <div className="flex gap-1 flex-wrap pt-1">
+                              {generatedTeams.filter(t => t.id !== team.id).map(otherTeam => (
+                                <Button
+                                  key={otherTeam.id}
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => swapPlayers(team.id, otherTeam.id)}
+                                  className="h-7 text-xs"
+                                >
+                                  <RefreshCw className="w-3 h-3 mr-1" />
+                                  Prohodit s {otherTeam.name}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        
-                        <div className="text-xs text-muted-foreground">
-                          Průměrná úroveň: {team.averageSkill.toFixed(1)}
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
 
                 <Button 
                   onClick={handleCreateTournament} 
                   className="w-full mt-4 bg-primary hover:bg-primary/90"
                   size="lg"
+                  disabled={isGenerating}
                 >
                   <ArrowRight className="w-5 h-5 mr-2" />
                   Vytvořit turnaj s těmito týmy

@@ -1,6 +1,6 @@
 import { useTournament } from '@/contexts/TournamentContext';
 import { Card } from '@/components/ui/card';
-import { Trophy } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -17,7 +17,22 @@ import {
 } from '@/components/ui/tooltip';
 
 export const StandingsTable = () => {
-  const { standings, getTeamById } = useTournament();
+  const { standings, previousStandings, getTeamById } = useTournament();
+  
+  const getPositionChange = (teamId: string, currentPosition: number) => {
+    if (!previousStandings || previousStandings.length === 0) return null;
+    
+    const previousPosition = previousStandings.findIndex(s => s.teamId === teamId);
+    if (previousPosition === -1) return null;
+    
+    const change = previousPosition - currentPosition;
+    if (change === 0) return null;
+    
+    return {
+      direction: change > 0 ? 'up' : 'down',
+      places: Math.abs(change)
+    };
+  };
 
   return (
     <Card className="p-6">
@@ -82,6 +97,7 @@ export const StandingsTable = () => {
             if (!team) return null;
 
             const isWinner = index === 0 && stat.points > 0;
+            const positionChange = getPositionChange(stat.teamId, index);
 
             return (
               <TableRow
@@ -92,11 +108,27 @@ export const StandingsTable = () => {
                   {isWinner ? '🏆' : index + 1}
                 </TableCell>
                 <TableCell className="font-semibold">
-                  <div>
-                    <div className="text-base">{team.name}</div>
-                    {(team.player1 || team.player2) && (
-                      <div className="text-xs text-muted-foreground">
-                        {[team.player1, team.player2].filter(Boolean).join(' & ')}
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <div className="text-base">{team.name}</div>
+                      {(team.player1 || team.player2) && (
+                        <div className="text-xs text-muted-foreground">
+                          {[team.player1, team.player2].filter(Boolean).join(' & ')}
+                        </div>
+                      )}
+                    </div>
+                    {positionChange && (
+                      <div className="flex items-center gap-1">
+                        {positionChange.direction === 'up' ? (
+                          <TrendingUp className="w-4 h-4 text-success" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-destructive" />
+                        )}
+                        <span className={`text-xs font-medium ${
+                          positionChange.direction === 'up' ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {positionChange.places}
+                        </span>
                       </div>
                     )}
                   </div>

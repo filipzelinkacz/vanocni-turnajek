@@ -3,9 +3,12 @@ import { Card } from '@/components/ui/card';
 import { CalendarDays } from 'lucide-react';
 
 export const UpcomingMatches = () => {
-  const { upcomingMatches, getTeamById } = useTournament();
+  const { upcomingMatches, getTeamById, tournament } = useTournament();
+  
+  // Show only scheduled matches (not finished)
+  const scheduledMatches = upcomingMatches.filter(m => m.status === 'scheduled');
 
-  if (upcomingMatches.length === 0) {
+  if (scheduledMatches.length === 0) {
     return null;
   }
 
@@ -17,7 +20,7 @@ export const UpcomingMatches = () => {
       </div>
 
       <div className="space-y-3">
-        {upcomingMatches.map(match => {
+        {scheduledMatches.map(match => {
           const teamA = getTeamById(match.teamAId);
           const teamB = getTeamById(match.teamBId);
           if (!teamA || !teamB) return null;
