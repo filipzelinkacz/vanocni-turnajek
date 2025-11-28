@@ -1,5 +1,5 @@
 import { NavLink } from '@/components/NavLink';
-import { Home, ListChecks, Settings, History, Users } from 'lucide-react';
+import { Home, ListChecks, Settings, History, Users, Trophy } from 'lucide-react';
 import marketupLogo from '@/assets/marketup-logo.png';
 
 export const Navigation = () => {
@@ -25,6 +25,15 @@ export const Navigation = () => {
           >
             <ListChecks className="w-5 h-5" />
             <span className="font-medium">Skóre</span>
+          </NavLink>
+          
+          <NavLink
+            to="/predictions"
+            className="flex items-center gap-2 px-4 py-2 rounded-full transition-colors hover:bg-primary/10"
+            activeClassName="bg-primary text-primary-foreground"
+          >
+            <Trophy className="w-5 h-5" />
+            <span className="font-medium">Tipovačka</span>
           </NavLink>
           
           <NavLink
