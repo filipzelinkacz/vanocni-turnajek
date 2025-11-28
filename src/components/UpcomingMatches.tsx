@@ -24,10 +24,10 @@ export const UpcomingMatches = () => {
       b: match.scorB.toString(),
     };
 
-    const numA = parseInt(current.a);
-    const numB = parseInt(current.b);
+    const numA = current.a === '' ? 0 : parseInt(current.a);
+    const numB = current.b === '' ? 0 : parseInt(current.b);
 
-    if (isNaN(numA) || isNaN(numB) || numA < 0 || numB < 0) {
+    if (isNaN(numA) || isNaN(numB)) {
       toast.error('Neplatné skóre');
       return;
     }
