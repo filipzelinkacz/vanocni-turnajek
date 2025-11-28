@@ -10,7 +10,7 @@ export const Navigation = () => {
         
         <div className="flex gap-2 items-center">
           <NavLink
-            to="/"
+            to="/dashboard"
             className="flex items-center gap-2 px-4 py-2 rounded-full transition-colors hover:bg-primary/10"
             activeClassName="bg-primary text-primary-foreground"
           >

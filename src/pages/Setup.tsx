@@ -1,13 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTournament } from '@/contexts/TournamentContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
-import { TournamentFormat, Team } from '@/types/tournament';
+import { Team } from '@/types/tournament';
 import { toast } from 'sonner';
 import marketupLogo from '@/assets/marketup-logo.png';
 
@@ -16,13 +15,22 @@ const Setup = () => {
   const { tournament, createTournament, archiveTournament } = useTournament();
   
   const [name, setName] = useState('Vánoční Fotbálek 2025');
-  const [format, setFormat] = useState<TournamentFormat>('round-robin');
   const [teams, setTeams] = useState<Team[]>([
     { id: crypto.randomUUID(), name: '', player1: '', player2: '' },
     { id: crypto.randomUUID(), name: '', player1: '', player2: '' },
     { id: crypto.randomUUID(), name: '', player1: '', player2: '' },
     { id: crypto.randomUUID(), name: '', player1: '', player2: '' },
   ]);
+
+  // Load generated teams from sessionStorage
+  useEffect(() => {
+    const generatedTeamsStr = sessionStorage.getItem('generatedTeams');
+    if (generatedTeamsStr) {
+      const generatedTeams = JSON.parse(generatedTeamsStr);
+      setTeams(generatedTeams);
+      sessionStorage.removeItem('generatedTeams');
+    }
+  }, []);
 
   const addTeam = () => {
     setTeams([...teams, { id: crypto.randomUUID(), name: '', player1: '', player2: '' }]);
@@ -54,6 +62,10 @@ const Setup = () => {
       return;
     }
 
+    // Get format from sessionStorage
+    const format = (sessionStorage.getItem('tournamentFormat') || 'round-robin') as any;
+    sessionStorage.removeItem('tournamentFormat');
+
     // Archive existing tournament if there is one
     if (tournament) {
       archiveTournament();
@@ -61,15 +73,29 @@ const Setup = () => {
 
     createTournament(name, format, validTeams);
     toast.success('Turnaj vytvořen!');
-    navigate('/');
+    navigate('/dashboard');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6 pt-24">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6 pt-24 relative overflow-hidden">
+      {/* Mountain background with blue filter */}
+      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920')] bg-cover bg-center opacity-20" 
+           style={{ filter: 'sepia(100%) hue-rotate(190deg) saturate(150%)' }} />
+      
+      <div className="max-w-4xl mx-auto relative z-10">
         <div className="flex items-center gap-3 mb-8">
-          <img src={marketupLogo} alt="Marketup" className="w-12 h-12" />
-          <h1 className="text-4xl font-bold text-primary">Vytvořit turnaj</h1>
+          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg border-4 border-background relative overflow-hidden">
+            <img src={marketupLogo} alt="Marketup" className="w-10 h-10 object-contain" />
+            {/* Soccer ball pattern */}
+            <div className="absolute inset-0 opacity-10" 
+                 style={{
+                   background: `repeating-conic-gradient(from 0deg, transparent 0deg 60deg, hsl(var(--primary-foreground)) 60deg 120deg)`
+                 }} />
+          </div>
+          <div>
+            <h1 className="text-4xl font-bold text-primary">Upravit a spustit</h1>
+            <p className="text-muted-foreground">Krok 3: Zkontrolujte a upravte názvy týmů a hráče</p>
+          </div>
         </div>
 
         <Card className="p-8 space-y-8">
@@ -82,20 +108,6 @@ const Setup = () => {
               onChange={(e) => setName(e.target.value)}
               className="text-lg"
             />
-          </div>
-
-          {/* Format */}
-          <div className="space-y-2">
-            <Label htmlFor="format">Formát turnaje</Label>
-            <Select value={format} onValueChange={(v) => setFormat(v as TournamentFormat)}>
-              <SelectTrigger id="format" className="text-lg">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="round-robin">Každý s každým</SelectItem>
-                <SelectItem value="two-groups">Dvě skupiny (A/B)</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Teams */}
