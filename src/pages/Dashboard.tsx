@@ -1,18 +1,35 @@
 import { useTournament } from '@/contexts/TournamentContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Maximize2 } from 'lucide-react';
+import { Maximize2, StopCircle } from 'lucide-react';
 import { StandingsTable } from '@/components/StandingsTable';
 import { RecentMatches } from '@/components/RecentMatches';
 import { UpcomingMatches } from '@/components/UpcomingMatches';
 import { GoalStats } from '@/components/GoalStats';
 import marketupLogo from '@/assets/marketup-logo.png';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
-  const { tournament } = useTournament();
+  const { tournament, endTournamentEarly } = useTournament();
 
   const handleFullscreen = () => {
     document.documentElement.requestFullscreen();
+  };
+  
+  const handleEndTournament = () => {
+    endTournamentEarly();
+    toast.success('Turnaj byl předčastně ukončen a archivován');
   };
 
   if (!tournament) {
@@ -46,10 +63,35 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-          <Button onClick={handleFullscreen} variant="outline" size="lg">
-            <Maximize2 className="w-5 h-5 mr-2" />
-            Celá obrazovka
-          </Button>
+          <div className="flex gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="lg" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                  <StopCircle className="w-5 h-5 mr-2" />
+                  Ukončit turnaj
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Předčasně ukončit turnaj?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Turnaj bude archivován do historie. Tato akce je nevratná.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Zrušit</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleEndTournament} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Ukončit turnaj
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            
+            <Button onClick={handleFullscreen} variant="outline" size="lg">
+              <Maximize2 className="w-5 h-5 mr-2" />
+              Celá obrazovka
+            </Button>
+          </div>
         </div>
         
         <Card className="p-4 bg-success/10 border-success/20">

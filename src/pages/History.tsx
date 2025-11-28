@@ -2,12 +2,13 @@ import { useTournament } from '@/contexts/TournamentContext';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Trophy, Calendar, Users, Trash2, Eye } from 'lucide-react';
+import { Trophy, Calendar, Users, Trash2, Eye, AlertTriangle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import marketupLogo from '@/assets/marketup-logo.png';
+import { toast } from 'sonner';
 
 const History = () => {
-  const { historicalTournaments, loadTournament, deleteTournament } = useTournament();
+  const { historicalTournaments, loadTournament, deleteTournament, clearAllData } = useTournament();
   const navigate = useNavigate();
 
   const handleView = (tournamentId: string) => {
@@ -17,17 +18,50 @@ const History = () => {
 
   const handleDelete = (tournamentId: string) => {
     deleteTournament(tournamentId);
+    toast.success('Turnaj smazán');
+  };
+  
+  const handleClearAll = () => {
+    clearAllData();
+    toast.success('Všechna data byla vymazána');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6 pt-24">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <img src={marketupLogo} alt="Marketup" className="w-12 h-12" />
-          <div>
-            <h1 className="text-4xl font-bold text-primary">Historické turnaje</h1>
-            <p className="text-muted-foreground">Přehled ukončených turnajů</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <img src={marketupLogo} alt="Marketup" className="w-12 h-12" />
+            <div>
+              <h1 className="text-4xl font-bold text-primary">Historické turnaje</h1>
+              <p className="text-muted-foreground">Přehled ukončených turnajů</p>
+            </div>
           </div>
+          
+          {historicalTournaments.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="lg">
+                  <AlertTriangle className="w-5 h-5 mr-2" />
+                  Vymazat všechna data
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Vymazat všechna data?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tato akce smaže aktuální turnaj, všechny historické turnaje a veškerá data. Tato akce je nevratná.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Zrušit</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Vymazat vše
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
 
         {historicalTournaments.length === 0 ? (
