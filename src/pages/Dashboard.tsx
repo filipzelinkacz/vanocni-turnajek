@@ -8,6 +8,7 @@ import { UpcomingMatches } from '@/components/UpcomingMatches';
 import { GoalStats } from '@/components/GoalStats';
 import { PlayoffBracket } from '@/components/PlayoffBracket';
 import { TournamentVictory } from '@/components/TournamentVictory';
+import TournamentCountdown from '@/components/TournamentCountdown';
 import marketupLogo from '@/assets/marketup-logo.png';
 import {
   AlertDialog,
@@ -36,17 +37,21 @@ const Dashboard = () => {
 
   if (!tournament) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-secondary">
-        <Card className="p-12 text-center max-w-lg">
-          <img src={marketupLogo} alt="Marketup" className="w-24 h-24 mx-auto mb-6" />
-          <h1 className="text-4xl font-bold mb-4 text-primary">Vánoční Fotbálek</h1>
-          <p className="text-muted-foreground mb-8 text-lg">
-            Vytvořte turnaj pro zahájení zápasů
-          </p>
-          <Button asChild size="lg" className="bg-accent hover:bg-accent/90">
-            <a href="/">Vytvořit turnaj</a>
-          </Button>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-secondary p-6">
+        <div className="max-w-4xl w-full space-y-6">
+          <Card className="p-12 text-center">
+            <img src={marketupLogo} alt="Marketup" className="w-24 h-24 mx-auto mb-6" />
+            <h1 className="text-4xl font-bold mb-4 text-primary">Vánoční Fotbálek</h1>
+            <p className="text-muted-foreground mb-8 text-lg">
+              Vytvořte turnaj pro zahájení zápasů
+            </p>
+            <Button asChild size="lg" className="bg-accent hover:bg-accent/90">
+              <a href="/">Vytvořit turnaj</a>
+            </Button>
+          </Card>
+          
+          <TournamentCountdown />
+        </div>
       </div>
     );
   }
