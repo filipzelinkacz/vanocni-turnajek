@@ -18,6 +18,8 @@ interface TournamentContextType {
   deleteTournament: (tournamentId: string) => void;
   clearAllData: () => void;
   endTournamentEarly: () => void;
+  startPlayoff: () => void;
+  canStartPlayoff: boolean;
 }
 
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
@@ -70,6 +72,7 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
       teams,
       matches,
       createdAt: new Date().toISOString(),
+      phase: 'group',
     };
     setTournament(newTournament);
   };
@@ -168,6 +171,75 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     archiveTournament();
   };
 
+  const canStartPlayoff = tournament 
+    ? tournament.phase === 'group' && 
+      tournament.matches.filter(m => !m.group || m.group === 'A' || m.group === 'B').every(m => m.status === 'finished')
+    : false;
+
+  const startPlayoff = () => {
+    if (!tournament || !canStartPlayoff) return;
+
+    const finalStandings = calculateStandings(tournament.teams, tournament.matches);
+    
+    // Top 4 teams for playoff
+    const top4 = finalStandings.slice(0, 4);
+    
+    if (top4.length < 4) return;
+
+    const playoffMatches: Match[] = [
+      // Semifinále 1: 1. vs 4.
+      {
+        id: crypto.randomUUID(),
+        teamAId: top4[0].teamId,
+        teamBId: top4[3].teamId,
+        scoreA: 0,
+        scorB: 0,
+        status: 'scheduled',
+        group: 'semifinal',
+        order: tournament.matches.length + 1,
+      },
+      // Semifinále 2: 2. vs 3.
+      {
+        id: crypto.randomUUID(),
+        teamAId: top4[1].teamId,
+        teamBId: top4[2].teamId,
+        scoreA: 0,
+        scorB: 0,
+        status: 'scheduled',
+        group: 'semifinal',
+        order: tournament.matches.length + 2,
+      },
+      // Zápas o 3. místo (TBD)
+      {
+        id: crypto.randomUUID(),
+        teamAId: '', // Will be filled after semifinals
+        teamBId: '',
+        scoreA: 0,
+        scorB: 0,
+        status: 'scheduled',
+        group: 'third-place',
+        order: tournament.matches.length + 3,
+      },
+      // Finále (TBD)
+      {
+        id: crypto.randomUUID(),
+        teamAId: '', // Will be filled after semifinals
+        teamBId: '',
+        scoreA: 0,
+        scorB: 0,
+        status: 'scheduled',
+        group: 'final',
+        order: tournament.matches.length + 4,
+      },
+    ];
+
+    setTournament({
+      ...tournament,
+      phase: 'playoff',
+      matches: [...tournament.matches, ...playoffMatches],
+    });
+  };
+
   return (
     <TournamentContext.Provider
       value={{
@@ -186,6 +258,8 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         deleteTournament,
         clearAllData,
         endTournamentEarly,
+        startPlayoff,
+        canStartPlayoff,
       }}
     >
       {children}

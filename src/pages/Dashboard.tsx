@@ -1,11 +1,12 @@
 import { useTournament } from '@/contexts/TournamentContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Maximize2, StopCircle } from 'lucide-react';
+import { Maximize2, StopCircle, Trophy } from 'lucide-react';
 import { StandingsTable } from '@/components/StandingsTable';
 import { RecentMatches } from '@/components/RecentMatches';
 import { UpcomingMatches } from '@/components/UpcomingMatches';
 import { GoalStats } from '@/components/GoalStats';
+import { PlayoffBracket } from '@/components/PlayoffBracket';
 import marketupLogo from '@/assets/marketup-logo.png';
 import {
   AlertDialog,
@@ -21,7 +22,7 @@ import {
 import { toast } from 'sonner';
 
 const Dashboard = () => {
-  const { tournament, endTournamentEarly } = useTournament();
+  const { tournament, endTournamentEarly, startPlayoff, canStartPlayoff } = useTournament();
 
   const handleFullscreen = () => {
     document.documentElement.requestFullscreen();
@@ -101,22 +102,51 @@ const Dashboard = () => {
         </Card>
       </div>
 
+      {/* Start Playoff Button */}
+      {canStartPlayoff && (
+        <div className="max-w-7xl mx-auto mb-6">
+          <Card className="p-6 bg-accent/10 border-accent/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-accent mb-1 flex items-center gap-2">
+                  <Trophy className="w-6 h-6" />
+                  Základní část dokončena!
+                </h3>
+                <p className="text-muted-foreground">
+                  Všechny zápasy základní části jsou hotové. Můžete spustit play-off.
+                </p>
+              </div>
+              <Button onClick={startPlayoff} size="lg" className="bg-accent hover:bg-accent/90">
+                <Trophy className="w-5 h-5 mr-2" />
+                Spustit Play-off
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left Column - Standings */}
-          <div className="lg:col-span-2 space-y-6">
-            <StandingsTable />
-            <RecentMatches />
-          </div>
+        {tournament.phase === 'playoff' ? (
+          <PlayoffBracket />
+        ) : (
+          <>
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Left Column - Standings */}
+              <div className="lg:col-span-2 space-y-6">
+                <StandingsTable />
+                <RecentMatches />
+              </div>
 
-          {/* Right Column - Upcoming */}
-          <div className="space-y-6">
-            <UpcomingMatches />
-          </div>
-        </div>
-        
-        <GoalStats />
+              {/* Right Column - Upcoming */}
+              <div className="space-y-6">
+                <UpcomingMatches />
+              </div>
+            </div>
+            
+            <GoalStats />
+          </>
+        )}
       </div>
     </div>
   );
