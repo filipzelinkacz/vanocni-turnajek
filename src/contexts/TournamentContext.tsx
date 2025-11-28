@@ -122,7 +122,6 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     ? tournament.matches
         .filter(m => m.status === 'scheduled')
         .sort((a, b) => a.order - b.order)
-        .slice(0, 3)
     : [];
 
   const archiveTournament = () => {

@@ -74,9 +74,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
 
         {/* Score */}
         <div className="flex items-center gap-4">
-          {match.status === 'scheduled' ? (
-            <div className="text-4xl font-bold text-muted-foreground">vs</div>
-          ) : isEditing ? (
+          {isEditing ? (
             <>
               <Input
                 type="number"
@@ -96,7 +94,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
                 className="w-20 text-center text-2xl font-bold"
               />
             </>
-          ) : (
+          ) : match.status === 'finished' ? (
             <div className="text-4xl font-bold">
               <span className={match.scoreA > match.scorB ? 'text-success' : ''}>
                 {match.scoreA}
@@ -106,6 +104,8 @@ export const MatchCard = ({ match }: MatchCardProps) => {
                 {match.scorB}
               </span>
             </div>
+          ) : (
+            <div className="text-4xl font-bold text-muted-foreground">vs</div>
           )}
         </div>
 
