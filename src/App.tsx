@@ -11,6 +11,7 @@ import Scores from "./pages/Scores";
 import History from "./pages/History";
 import GenerateTeams from "./pages/GenerateTeams";
 import FormatSelection from "./pages/FormatSelection";
+import Predictions from "./pages/Predictions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/setup" element={<Setup />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/scores" element={<Scores />} />
+            <Route path="/predictions" element={<Predictions />} />
             <Route path="/history" element={<History />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
