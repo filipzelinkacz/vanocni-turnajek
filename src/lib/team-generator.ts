@@ -2,16 +2,16 @@ import { PlayerWithSkill, GeneratedTeam, SkillLevel } from '@/types/player';
 
 // Marketing buzzwords for fun team names
 const marketingWords = [
-  'Digital', 'Creative', 'Strategic', 'Innovative', 'Dynamic', 'Viral', 
-  'Organic', 'Engaging', 'Interactive', 'Responsive', 'Optimized', 'Synergy',
-  'Disruptive', 'Agile', 'Performance', 'Conversion', 'ROI', 'Growth',
-  'Brand', 'Content', 'Social', 'Analytics', 'Influence', 'Campaign'
+  'Digitální', 'Kreativní', 'Strategičtí', 'Inovativní', 'Dynamičtí', 'Virální', 
+  'Organičtí', 'Zapojení', 'Interaktivní', 'Responzivní', 'Optimalizovaní', 'Synergičtí',
+  'Disruptivní', 'Agilní', 'Výkonnostní', 'Konverzní', 'ROI', 'Růstoví',
+  'Brandoví', 'Contentoví', 'Sociální', 'Analytičtí', 'Influenceři', 'Kampaňoví'
 ];
 
 const christmasWords = [
-  'Elves', 'Snowflakes', 'Reindeer', 'Presents', 'Cookies', 'Mistletoe',
-  'Angels', 'Stars', 'Bells', 'Lights', 'Carols', 'Spirits',
-  'Sleigh', 'Gingerbread', 'Tinsel', 'Wreath', 'Joy', 'Cheer'
+  'Skřítkové', 'Vločky', 'Sobíci', 'Dárečci', 'Cukroví', 'Jmelí',
+  'Andělé', 'Hvězdy', 'Zvonečky', 'Světýlka', 'Koledy', 'Duchové',
+  'Saně', 'Perníčci', 'Řetězy', 'Věnečky', 'Radost', 'Pohoda'
 ];
 
 const generateTeamName = (index: number): string => {
