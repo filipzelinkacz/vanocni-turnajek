@@ -21,7 +21,7 @@ const Scores = () => {
   const finishedMatches = tournament.matches.filter(m => m.status === 'finished');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6 pt-24">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <img src={marketupLogo} alt="Marketup" className="w-12 h-12" />

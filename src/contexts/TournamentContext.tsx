@@ -4,6 +4,7 @@ import { generateMatches, calculateStandings } from '@/lib/tournament-utils';
 
 interface TournamentContextType {
   tournament: Tournament | null;
+  historicalTournaments: Tournament[];
   createTournament: (name: string, format: TournamentFormat, teams: Team[]) => void;
   updateMatchScore: (matchId: string, scoreA: number, scoreB: number) => void;
   finishMatch: (matchId: string) => void;
@@ -11,20 +12,30 @@ interface TournamentContextType {
   standings: TeamStats[];
   recentMatches: Match[];
   upcomingMatches: Match[];
+  archiveTournament: () => void;
+  loadTournament: (tournamentId: string) => void;
+  deleteTournament: (tournamentId: string) => void;
 }
 
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'foosball-tournament';
+const HISTORY_KEY = 'foosball-tournament-history';
 
 export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   const [tournament, setTournament] = useState<Tournament | null>(null);
+  const [historicalTournaments, setHistoricalTournaments] = useState<Tournament[]>([]);
 
   // Load from localStorage
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       setTournament(JSON.parse(stored));
+    }
+    
+    const history = localStorage.getItem(HISTORY_KEY);
+    if (history) {
+      setHistoricalTournaments(JSON.parse(history));
     }
   }, []);
 
@@ -34,6 +45,10 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tournament));
     }
   }, [tournament]);
+  
+  useEffect(() => {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(historicalTournaments));
+  }, [historicalTournaments]);
 
   const createTournament = (name: string, format: TournamentFormat, teams: Team[]) => {
     const matches = generateMatches(teams, format);
@@ -95,10 +110,35 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         .slice(0, 3)
     : [];
 
+  const archiveTournament = () => {
+    if (!tournament) return;
+    
+    const archivedTournament = {
+      ...tournament,
+      archivedAt: new Date().toISOString(),
+    };
+    
+    setHistoricalTournaments([archivedTournament, ...historicalTournaments]);
+    setTournament(null);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+  
+  const loadTournament = (tournamentId: string) => {
+    const tournamentToLoad = historicalTournaments.find(t => t.id === tournamentId);
+    if (tournamentToLoad) {
+      setTournament(tournamentToLoad);
+    }
+  };
+  
+  const deleteTournament = (tournamentId: string) => {
+    setHistoricalTournaments(historicalTournaments.filter(t => t.id !== tournamentId));
+  };
+
   return (
     <TournamentContext.Provider
       value={{
         tournament,
+        historicalTournaments,
         createTournament,
         updateMatchScore,
         finishMatch,
@@ -106,6 +146,9 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         standings,
         recentMatches,
         upcomingMatches,
+        archiveTournament,
+        loadTournament,
+        deleteTournament,
       }}
     >
       {children}
