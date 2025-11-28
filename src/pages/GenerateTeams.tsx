@@ -23,9 +23,9 @@ const GenerateTeams = () => {
   
   const [generatedTeams, setGeneratedTeams] = useState<GeneratedTeam[]>([]);
   const [teamNamesGenerated, setTeamNamesGenerated] = useState(false);
-  const [playersAssigned, setPlayersAssigned] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [currentAnimationIndex, setCurrentAnimationIndex] = useState(-1);
+  const [playersAssignedCount, setPlayersAssignedCount] = useState(0);
+  const [balancedTeamsData, setBalancedTeamsData] = useState<GeneratedTeam[]>([]);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const addPlayer = () => {
     setPlayers([...players, { id: crypto.randomUUID(), name: '', skillLevel: 2 }]);
@@ -63,6 +63,7 @@ const GenerateTeams = () => {
     }
     
     const teams = generateBalancedTeams(validPlayers);
+    setBalancedTeamsData(teams);
     
     // Create teams with names only (no players yet)
     const teamsWithNamesOnly = teams.map(team => ({
@@ -73,38 +74,32 @@ const GenerateTeams = () => {
     
     setGeneratedTeams(teamsWithNamesOnly);
     setTeamNamesGenerated(true);
-    setPlayersAssigned(false);
+    setPlayersAssignedCount(0);
     toast.success('Názvy týmů vygenerovány!');
   };
 
-  const handleAssignPlayers = async () => {
-    const validPlayers = players.filter(p => p.name.trim());
-    const teams = generateBalancedTeams(validPlayers);
+  const handleAssignNextPlayer = async () => {
+    if (playersAssignedCount >= balancedTeamsData.length) {
+      toast.success('Všichni hráči přiřazeni!', { icon: '🎉' });
+      return;
+    }
     
-    try {
-      setIsGenerating(true);
-      setCurrentAnimationIndex(-1);
-      
-      // Animate player assignment
-      for (let i = 0; i < teams.length; i++) {
-        setCurrentAnimationIndex(i);
-        setGeneratedTeams(prevTeams => 
-          prevTeams.map((team, idx) => 
-            idx === i ? teams[i] : team
-          )
-        );
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      }
-      
-      setIsGenerating(false);
-      setCurrentAnimationIndex(-1);
-      setPlayersAssigned(true);
-      toast.success('Hráči přiřazeni!', {
-        icon: '🎉',
-      });
-    } catch (error) {
-      setIsGenerating(false);
-      toast.error('Chyba při přiřazování hráčů');
+    setIsAssigning(true);
+    
+    // Assign one player with animation
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    setGeneratedTeams(prevTeams => 
+      prevTeams.map((team, idx) => 
+        idx === playersAssignedCount ? balancedTeamsData[playersAssignedCount] : team
+      )
+    );
+    
+    setPlayersAssignedCount(prev => prev + 1);
+    setIsAssigning(false);
+    
+    if (playersAssignedCount + 1 === balancedTeamsData.length) {
+      toast.success('Všichni hráči přiřazeni!', { icon: '🎉' });
     }
   };
 
@@ -114,8 +109,8 @@ const GenerateTeams = () => {
   };
 
   const handleCreateTournament = () => {
-    if (!playersAssigned) {
-      toast.error('Nejdříve přiřaďte hráče');
+    if (playersAssignedCount < balancedTeamsData.length) {
+      toast.error('Nejdříve přiřaďte všechny hráče');
       return;
     }
     
@@ -131,11 +126,24 @@ const GenerateTeams = () => {
     navigate('/');
   };
 
+  const allPlayersAssigned = playersAssignedCount === balancedTeamsData.length && balancedTeamsData.length > 0;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6 pt-24">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-winter via-background to-winter/50 p-6 pt-24 relative overflow-hidden">
+      {/* Mountain background with blue filter */}
+      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920')] bg-cover bg-center opacity-20" 
+           style={{ filter: 'sepia(100%) hue-rotate(190deg) saturate(150%)' }} />
+      
+      <div className="max-w-6xl mx-auto relative z-10">
         <div className="flex items-center gap-3 mb-8">
-          <img src={marketupLogo} alt="Marketup" className="w-12 h-12" />
+          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg border-4 border-background relative overflow-hidden">
+            <img src={marketupLogo} alt="Marketup" className="w-10 h-10 object-contain" />
+            {/* Soccer ball pattern */}
+            <div className="absolute inset-0 opacity-10" 
+                 style={{
+                   background: `repeating-conic-gradient(from 0deg, transparent 0deg 60deg, hsl(var(--primary-foreground)) 60deg 120deg)`
+                 }} />
+          </div>
           <div>
             <h1 className="text-4xl font-bold text-primary">Generovat týmy</h1>
             <p className="text-muted-foreground">Vytvořte vyvážené týmy na základě úrovně hráčů</p>
@@ -230,23 +238,23 @@ const GenerateTeams = () => {
               </div>
             ) : (
               <>
-                {!playersAssigned && (
+                {!allPlayersAssigned && (
                   <div className="mb-4">
                     <Button 
-                      onClick={handleAssignPlayers} 
+                      onClick={handleAssignNextPlayer} 
                       className="w-full bg-success hover:bg-success/90 text-success-foreground"
                       size="lg"
-                      disabled={isGenerating}
+                      disabled={isAssigning}
                     >
-                      <Shuffle className={`w-6 h-6 mr-2 ${isGenerating ? 'animate-spin' : ''}`} />
-                      {isGenerating ? 'Přiřazuji hráče...' : 'Přiřadit hráče'}
+                      <Shuffle className={`w-6 h-6 mr-2 ${isAssigning ? 'animate-spin' : ''}`} />
+                      {isAssigning ? 'Přiřazuji hráče...' : `Přiřadit hráče (${playersAssignedCount}/${balancedTeamsData.length})`}
                     </Button>
                   </div>
                 )}
 
                 <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
                   {generatedTeams.map((team, index) => {
-                    const isAnimating = index === currentAnimationIndex;
+                    const isAnimating = index === playersAssignedCount - 1 && isAssigning;
                     const hasPlayers = team.player1.name !== '?';
                     return (
                       <Card 
@@ -263,7 +271,7 @@ const GenerateTeams = () => {
                               value={team.name}
                               onChange={(e) => updateTeamName(team.id, e.target.value)}
                               className="font-semibold flex-1 h-9"
-                              disabled={!playersAssigned}
+                              disabled={!allPlayersAssigned}
                             />
                             {isAnimating && (
                               <PartyPopper className="w-5 h-5 text-success animate-bounce" />
@@ -295,7 +303,7 @@ const GenerateTeams = () => {
                   })}
                 </div>
 
-                {playersAssigned && (
+                {allPlayersAssigned && (
                   <Button 
                     onClick={handleCreateTournament} 
                     className="w-full mt-4 bg-primary hover:bg-primary/90"
