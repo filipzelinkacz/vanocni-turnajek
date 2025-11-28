@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
 import { useTournament } from '@/contexts/TournamentContext';
 import { Card } from '@/components/ui/card';
-import { Trophy, Medal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, Medal, ArrowRight } from 'lucide-react';
 import { MatchCard } from './MatchCard';
 
 export const PlayoffBracket = () => {
-  const { tournament, getTeamById, finishMatch } = useTournament();
+  const { tournament, advanceToFinals, canAdvanceToFinals } = useTournament();
 
   if (!tournament || tournament.phase !== 'playoff') return null;
 
@@ -14,40 +14,7 @@ export const PlayoffBracket = () => {
   const finalMatch = tournament.matches.find(m => m.group === 'final');
 
   const allSemifinalsFinished = semifinalMatches.every(m => m.status === 'finished');
-
-  // Auto-update third place and final matches when semifinals are finished
-  useEffect(() => {
-    if (!allSemifinalsFinished || !tournament) return;
-
-    const semi1 = semifinalMatches[0];
-    const semi2 = semifinalMatches[1];
-
-    if (!semi1 || !semi2 || !thirdPlaceMatch || !finalMatch) return;
-
-    // Determine winners and losers
-    const semi1Winner = semi1.scoreA > semi1.scorB ? semi1.teamAId : semi1.teamBId;
-    const semi1Loser = semi1.scoreA > semi1.scorB ? semi1.teamBId : semi1.teamAId;
-    const semi2Winner = semi2.scoreA > semi2.scorB ? semi2.teamAId : semi2.teamBId;
-    const semi2Loser = semi2.scoreA > semi2.scorB ? semi2.teamBId : semi2.teamAId;
-
-    // Update third place match if not already set
-    if (!thirdPlaceMatch.teamAId || !thirdPlaceMatch.teamBId) {
-      const updatedMatches = tournament.matches.map(m => {
-        if (m.id === thirdPlaceMatch.id) {
-          return { ...m, teamAId: semi1Loser, teamBId: semi2Loser };
-        }
-        if (m.id === finalMatch.id) {
-          return { ...m, teamAId: semi1Winner, teamBId: semi2Winner };
-        }
-        return m;
-      });
-
-      // Update tournament with new team assignments
-      const updatedTournament = { ...tournament, matches: updatedMatches };
-      localStorage.setItem('foosball-tournament', JSON.stringify(updatedTournament));
-      window.location.reload(); // Force refresh to show updated bracket
-    }
-  }, [allSemifinalsFinished, semifinalMatches, thirdPlaceMatch, finalMatch, tournament]);
+  const finalsReady = finalMatch?.teamAId && finalMatch?.teamBId;
 
   return (
     <div className="space-y-8">
@@ -74,8 +41,22 @@ export const PlayoffBracket = () => {
         </div>
       </Card>
 
+      {/* Advance to Finals Button */}
+      {canAdvanceToFinals && (
+        <div className="flex justify-center">
+          <Button
+            onClick={advanceToFinals}
+            size="lg"
+            className="bg-accent hover:bg-accent/90 text-lg px-8 py-6"
+          >
+            <ArrowRight className="w-6 h-6 mr-2" />
+            Přistoupit k finále a hře o třetí místo
+          </Button>
+        </div>
+      )}
+
       {/* Third Place & Final */}
-      {allSemifinalsFinished && (
+      {finalsReady && (
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Third Place */}
           {thirdPlaceMatch && thirdPlaceMatch.teamAId && thirdPlaceMatch.teamBId && (
@@ -101,10 +82,18 @@ export const PlayoffBracket = () => {
         </div>
       )}
 
+      {allSemifinalsFinished && !finalsReady && !canAdvanceToFinals && (
+        <Card className="p-6 bg-muted/10">
+          <p className="text-center text-muted-foreground">
+            Stiskněte tlačítko pro přechod k finále
+          </p>
+        </Card>
+      )}
+
       {!allSemifinalsFinished && (
         <Card className="p-6 bg-muted/10">
           <p className="text-center text-muted-foreground">
-            Dokončete semifinálové zápasy pro zobrazení finále a zápasu o 3. místo
+            Dokončete semifinálové zápasy
           </p>
         </Card>
       )}

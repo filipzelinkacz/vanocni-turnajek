@@ -7,6 +7,7 @@ import { RecentMatches } from '@/components/RecentMatches';
 import { UpcomingMatches } from '@/components/UpcomingMatches';
 import { GoalStats } from '@/components/GoalStats';
 import { PlayoffBracket } from '@/components/PlayoffBracket';
+import { TournamentVictory } from '@/components/TournamentVictory';
 import marketupLogo from '@/assets/marketup-logo.png';
 import {
   AlertDialog,
@@ -22,7 +23,7 @@ import {
 import { toast } from 'sonner';
 
 const Dashboard = () => {
-  const { tournament, endTournamentEarly, startPlayoff, canStartPlayoff } = useTournament();
+  const { tournament, endTournamentEarly, startPlayoff, canStartPlayoff, isTournamentFinished } = useTournament();
 
   const handleFullscreen = () => {
     document.documentElement.requestFullscreen();
@@ -127,7 +128,9 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto space-y-6">
-        {tournament.phase === 'playoff' ? (
+        {isTournamentFinished ? (
+          <TournamentVictory />
+        ) : tournament.phase === 'playoff' ? (
           <PlayoffBracket />
         ) : (
           <>
