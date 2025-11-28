@@ -6,6 +6,7 @@ export interface Prediction {
   playerName: string;
   predictedTeamId: string;
   timestamp: string;
+  tournamentId: string;
 }
 
 interface TournamentContextType {
@@ -98,6 +99,8 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
       phase: 'group',
     };
     setTournament(newTournament);
+    // Clear predictions when creating a new tournament
+    setPredictions([]);
   };
 
   const updateMatchScore = (matchId: string, scoreA: number, scoreB: number) => {
@@ -167,6 +170,8 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     setHistoricalTournaments([archivedTournament, ...historicalTournaments]);
     setTournament(null);
     localStorage.removeItem(STORAGE_KEY);
+    // Clear predictions when archiving tournament
+    setPredictions([]);
   };
   
   const loadTournament = (tournamentId: string) => {
@@ -192,10 +197,13 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addPrediction = (playerName: string, predictedTeamId: string) => {
+    if (!tournament) return;
+    
     const newPrediction: Prediction = {
       playerName,
       predictedTeamId,
       timestamp: new Date().toISOString(),
+      tournamentId: tournament.id,
     };
     setPredictions([...predictions, newPrediction]);
   };
@@ -203,6 +211,11 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   const canMakePredictions = tournament 
     ? tournament.matches.every(m => m.status === 'scheduled')
     : false;
+
+  // Filter predictions to only show those for the current tournament
+  const currentTournamentPredictions = tournament
+    ? predictions.filter(p => p.tournamentId === tournament.id)
+    : [];
   
   const endTournamentEarly = () => {
     if (!tournament) return;
@@ -346,7 +359,7 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         advanceToFinals,
         canAdvanceToFinals,
         isTournamentFinished,
-        predictions,
+        predictions: currentTournamentPredictions,
         addPrediction,
         canMakePredictions,
       }}
