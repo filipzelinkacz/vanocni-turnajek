@@ -75,33 +75,39 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateMatchScore = (matchId: string, scoreA: number, scoreB: number) => {
-    if (!tournament) return;
-    
-    setTournament({
-      ...tournament,
-      matches: tournament.matches.map(match =>
-        match.id === matchId
-          ? { ...match, scoreA, scorB: scoreB }
-          : match
-      ),
+    setTournament(prev => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        matches: prev.matches.map(match =>
+          match.id === matchId
+            ? { ...match, scoreA, scorB: scoreB }
+            : match
+        ),
+      };
     });
   };
 
   const finishMatch = (matchId: string) => {
     if (!tournament) return;
-    
+
     // Save current standings before finishing match
     const currentStandings = calculateStandings(tournament.teams, tournament.matches);
     setPreviousStandings(currentStandings);
     localStorage.setItem(STANDINGS_KEY, JSON.stringify(currentStandings));
-    
-    setTournament({
-      ...tournament,
-      matches: tournament.matches.map(match =>
-        match.id === matchId
-          ? { ...match, status: 'finished' as const }
-          : match
-      ),
+
+    setTournament(prev => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        matches: prev.matches.map(match =>
+          match.id === matchId
+            ? { ...match, status: 'finished' as const }
+            : match
+        ),
+      };
     });
   };
 
