@@ -48,7 +48,7 @@ export const PasswordProtection = ({ onSuccess }: PasswordProtectionProps) => {
             </Label>
             <Input
               id="password"
-              type="password"
+              type="text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Zadejte heslo..."

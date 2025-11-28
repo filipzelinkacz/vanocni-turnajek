@@ -34,46 +34,25 @@ export const PredictionResults = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Correct Predictions */}
-        <div>
-          <h3 className="text-lg font-bold text-success mb-3 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5" />
-            Správné tipy ({correctPredictions.length})
-          </h3>
-          <div className="space-y-2">
-            {correctPredictions.map((prediction, idx) => (
-              <div key={idx} className="p-3 bg-success/10 border border-success/20 rounded-lg">
-                <div className="font-medium text-primary">{prediction.playerName}</div>
-                <div className="text-sm text-muted-foreground">
-                  Tipoval: {getTeamById(prediction.predictedTeamId)?.name}
-                </div>
+      <div>
+        <h3 className="text-lg font-bold text-success mb-3 flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5" />
+          Správné tipy ({correctPredictions.length})
+        </h3>
+        <div className="space-y-2">
+          {correctPredictions.map((prediction, idx) => (
+            <div key={idx} className="p-3 bg-success/10 border border-success/20 rounded-lg">
+              <div className="font-medium text-primary">{prediction.playerName}</div>
+              <div className="text-sm text-muted-foreground">
+                Tipoval: {getTeamById(prediction.predictedTeamId)?.name}
               </div>
-            ))}
-            {correctPredictions.length === 0 && (
-              <div className="text-sm text-muted-foreground italic">
-                Nikdo neuhodl správně 😅
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Incorrect Predictions */}
-        <div>
-          <h3 className="text-lg font-bold text-destructive mb-3 flex items-center gap-2">
-            <XCircle className="w-5 h-5" />
-            Nesprávné tipy ({incorrectPredictions.length})
-          </h3>
-          <div className="space-y-2">
-            {incorrectPredictions.map((prediction, idx) => (
-              <div key={idx} className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <div className="font-medium text-primary">{prediction.playerName}</div>
-                <div className="text-sm text-muted-foreground">
-                  Tipoval: {getTeamById(prediction.predictedTeamId)?.name}
-                </div>
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
+          {correctPredictions.length === 0 && (
+            <div className="text-sm text-muted-foreground italic">
+              Nikdo neuhodl správně 😅
+            </div>
+          )}
         </div>
       </div>
     </Card>
