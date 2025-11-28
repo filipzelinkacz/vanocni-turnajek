@@ -1,12 +1,40 @@
 import { useTournament } from '@/contexts/TournamentContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Trophy, Medal, Award, TrendingUp, Target } from 'lucide-react';
+import { Trophy, Medal, Award, TrendingUp, Target, Download } from 'lucide-react';
 import { StandingsTable } from './StandingsTable';
 import { GoalStats } from './GoalStats';
+import { AllMatchesResults } from './AllMatchesResults';
+import { PredictionResults } from './PredictionResults';
+import { MatchHighlights } from './MatchHighlights';
+import html2pdf from 'html2pdf.js';
+import { toast } from 'sonner';
 
 export const TournamentVictory = () => {
   const { tournament, getTeamById, standings, archiveTournament } = useTournament();
+
+  const handleExportPDF = async () => {
+    const element = document.getElementById('victory-content');
+    if (!element) return;
+
+    toast.info('Generuji PDF...');
+
+    const opt = {
+      margin: 10,
+      filename: `${tournament?.name || 'turnaj'}-vysledky.pdf`,
+      image: { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+    };
+
+    try {
+      await html2pdf().set(opt).from(element).save();
+      toast.success('PDF bylo vytvořeno!');
+    } catch (error) {
+      toast.error('Chyba při vytváření PDF');
+      console.error(error);
+    }
+  };
 
   if (!tournament) return null;
 
@@ -36,6 +64,15 @@ export const TournamentVictory = () => {
 
   return (
     <div className="space-y-8 pb-12">
+      {/* Export PDF Button */}
+      <div className="flex justify-end">
+        <Button onClick={handleExportPDF} variant="outline" size="lg">
+          <Download className="w-5 h-5 mr-2" />
+          Exportovat do PDF
+        </Button>
+      </div>
+
+      <div id="victory-content" className="space-y-8">
       {/* Victory Banner */}
       <Card className="relative overflow-hidden bg-gradient-to-br from-accent/20 via-primary/10 to-accent/20 border-accent/30">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
@@ -129,6 +166,15 @@ export const TournamentVictory = () => {
         </Card>
       </div>
 
+      {/* Match Highlights */}
+      <MatchHighlights />
+
+      {/* Prediction Results */}
+      <PredictionResults />
+
+      {/* All Matches Results */}
+      <AllMatchesResults />
+
       {/* Goal Statistics */}
       <GoalStats />
 
@@ -139,6 +185,7 @@ export const TournamentVictory = () => {
           Konečná tabulka skupinové části
         </h2>
         <StandingsTable />
+      </div>
       </div>
 
       {/* Archive Button */}
