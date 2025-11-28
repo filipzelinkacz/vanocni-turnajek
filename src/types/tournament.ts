@@ -2,6 +2,8 @@ export type TournamentFormat = 'round-robin' | 'two-groups';
 
 export type MatchStatus = 'scheduled' | 'finished';
 
+export type TournamentPhase = 'group' | 'playoff';
+
 export interface Player {
   name: string;
 }
@@ -43,4 +45,5 @@ export interface Tournament {
   teams: Team[];
   matches: Match[];
   createdAt: string;
+  phase: TournamentPhase;
 }
