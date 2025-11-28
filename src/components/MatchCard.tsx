@@ -122,7 +122,7 @@ export const MatchCard = ({ match }: MatchCardProps) => {
 
       {/* Actions */}
       <div className="mt-6 flex justify-center gap-3">
-        {match.status === 'scheduled' && (
+        {isEditing && (
           <Button onClick={handleSave} className="bg-accent hover:bg-accent/90">
             <Save className="w-4 h-4 mr-2" />
             Uložit skóre
