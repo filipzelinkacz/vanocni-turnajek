@@ -14,7 +14,6 @@ import marketupLogo from '@/assets/marketup-logo.png';
 
 const GenerateTeams = () => {
   const navigate = useNavigate();
-  const { createTournament } = useTournament();
   
   const [players, setPlayers] = useState<PlayerWithSkill[]>([
     { id: crypto.randomUUID(), name: '', skillLevel: 2 },
@@ -108,7 +107,7 @@ const GenerateTeams = () => {
     setGeneratedTeams(generatedTeams.map(t => t.id === teamId ? { ...t, name } : t));
   };
 
-  const handleCreateTournament = () => {
+  const handleContinueToSetup = () => {
     if (playersAssignedCount < balancedTeamsData.length) {
       toast.error('Nejdříve přiřaďte všechny hráče');
       return;
@@ -121,9 +120,9 @@ const GenerateTeams = () => {
       player2: gt.player2.name,
     }));
     
-    createTournament('Vánoční Fotbálek 2025', 'round-robin', teams);
-    toast.success('Turnaj vytvořen!');
-    navigate('/');
+    sessionStorage.setItem('generatedTeams', JSON.stringify(teams));
+    toast.success('Týmy připraveny k úpravě!');
+    navigate('/setup');
   };
 
   const allPlayersAssigned = playersAssignedCount === balancedTeamsData.length && balancedTeamsData.length > 0;
@@ -305,12 +304,12 @@ const GenerateTeams = () => {
 
                 {allPlayersAssigned && (
                   <Button 
-                    onClick={handleCreateTournament} 
+                    onClick={handleContinueToSetup} 
                     className="w-full mt-4 bg-primary hover:bg-primary/90"
                     size="lg"
                   >
                     <ArrowRight className="w-5 h-5 mr-2" />
-                    Vytvořit turnaj s těmito týmy
+                    Pokračovat k úpravě týmů
                   </Button>
                 )}
               </>
