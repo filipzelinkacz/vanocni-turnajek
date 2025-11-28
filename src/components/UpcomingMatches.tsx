@@ -24,10 +24,16 @@ export const UpcomingMatches = () => {
       b: match.scorB.toString(),
     };
 
-    const numA = current.a === '' ? 0 : parseInt(current.a);
-    const numB = current.b === '' ? 0 : parseInt(current.b);
+    // Require both scores to be filled, but allow explicit 0
+    if (current.a === '' || current.b === '') {
+      toast.error('Vyplňte skóre pro oba týmy');
+      return;
+    }
 
-    if (isNaN(numA) || isNaN(numB)) {
+    const numA = parseInt(current.a, 10);
+    const numB = parseInt(current.b, 10);
+
+    if (Number.isNaN(numA) || Number.isNaN(numB)) {
       toast.error('Neplatné skóre');
       return;
     }
@@ -91,10 +97,17 @@ export const UpcomingMatches = () => {
                     max="99"
                     value={current.a}
                     onChange={(e) =>
-                      setScores(prev => ({
-                        ...prev,
-                        [match.id]: { ...prev[match.id], a: e.target.value },
-                      }))
+                      setScores((prev) => {
+                        const prevMatch =
+                          prev[match.id] ?? {
+                            a: match.scoreA.toString(),
+                            b: match.scorB.toString(),
+                          };
+                        return {
+                          ...prev,
+                          [match.id]: { ...prevMatch, a: e.target.value },
+                        };
+                      })
                     }
                     className="w-16 text-center text-lg font-bold"
                   />
@@ -105,10 +118,17 @@ export const UpcomingMatches = () => {
                     max="99"
                     value={current.b}
                     onChange={(e) =>
-                      setScores(prev => ({
-                        ...prev,
-                        [match.id]: { ...prev[match.id], b: e.target.value },
-                      }))
+                      setScores((prev) => {
+                        const prevMatch =
+                          prev[match.id] ?? {
+                            a: match.scoreA.toString(),
+                            b: match.scorB.toString(),
+                          };
+                        return {
+                          ...prev,
+                          [match.id]: { ...prevMatch, b: e.target.value },
+                        };
+                      })
                     }
                     className="w-16 text-center text-lg font-bold"
                   />
