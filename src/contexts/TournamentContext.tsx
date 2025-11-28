@@ -16,6 +16,8 @@ interface TournamentContextType {
   archiveTournament: () => void;
   loadTournament: (tournamentId: string) => void;
   deleteTournament: (tournamentId: string) => void;
+  clearAllData: () => void;
+  endTournamentEarly: () => void;
 }
 
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
@@ -146,6 +148,20 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   const deleteTournament = (tournamentId: string) => {
     setHistoricalTournaments(historicalTournaments.filter(t => t.id !== tournamentId));
   };
+  
+  const clearAllData = () => {
+    setTournament(null);
+    setHistoricalTournaments([]);
+    setPreviousStandings([]);
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(HISTORY_KEY);
+    localStorage.removeItem(STANDINGS_KEY);
+  };
+  
+  const endTournamentEarly = () => {
+    if (!tournament) return;
+    archiveTournament();
+  };
 
   return (
     <TournamentContext.Provider
@@ -163,6 +179,8 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         archiveTournament,
         loadTournament,
         deleteTournament,
+        clearAllData,
+        endTournamentEarly,
       }}
     >
       {children}
