@@ -10,6 +10,7 @@ interface TournamentContextType {
   finishMatch: (matchId: string) => void;
   getTeamById: (teamId: string) => Team | undefined;
   standings: TeamStats[];
+  previousStandings: TeamStats[];
   recentMatches: Match[];
   upcomingMatches: Match[];
   archiveTournament: () => void;
@@ -21,10 +22,12 @@ const TournamentContext = createContext<TournamentContextType | undefined>(undef
 
 const STORAGE_KEY = 'foosball-tournament';
 const HISTORY_KEY = 'foosball-tournament-history';
+const STANDINGS_KEY = 'foosball-previous-standings';
 
 export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [historicalTournaments, setHistoricalTournaments] = useState<Tournament[]>([]);
+  const [previousStandings, setPreviousStandings] = useState<TeamStats[]>([]);
 
   // Load from localStorage
   useEffect(() => {
@@ -36,6 +39,11 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     const history = localStorage.getItem(HISTORY_KEY);
     if (history) {
       setHistoricalTournaments(JSON.parse(history));
+    }
+    
+    const prevStandings = localStorage.getItem(STANDINGS_KEY);
+    if (prevStandings) {
+      setPreviousStandings(JSON.parse(prevStandings));
     }
   }, []);
 
@@ -79,6 +87,11 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
 
   const finishMatch = (matchId: string) => {
     if (!tournament) return;
+    
+    // Save current standings before finishing match
+    const currentStandings = calculateStandings(tournament.teams, tournament.matches);
+    setPreviousStandings(currentStandings);
+    localStorage.setItem(STANDINGS_KEY, JSON.stringify(currentStandings));
     
     setTournament({
       ...tournament,
@@ -144,6 +157,7 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         finishMatch,
         getTeamById,
         standings,
+        previousStandings,
         recentMatches,
         upcomingMatches,
         archiveTournament,

@@ -1,5 +1,25 @@
 import { PlayerWithSkill, GeneratedTeam, SkillLevel } from '@/types/player';
 
+// Marketing buzzwords for fun team names
+const marketingWords = [
+  'Digital', 'Creative', 'Strategic', 'Innovative', 'Dynamic', 'Viral', 
+  'Organic', 'Engaging', 'Interactive', 'Responsive', 'Optimized', 'Synergy',
+  'Disruptive', 'Agile', 'Performance', 'Conversion', 'ROI', 'Growth',
+  'Brand', 'Content', 'Social', 'Analytics', 'Influence', 'Campaign'
+];
+
+const christmasWords = [
+  'Elves', 'Snowflakes', 'Reindeer', 'Presents', 'Cookies', 'Mistletoe',
+  'Angels', 'Stars', 'Bells', 'Lights', 'Carols', 'Spirits',
+  'Sleigh', 'Gingerbread', 'Tinsel', 'Wreath', 'Joy', 'Cheer'
+];
+
+const generateTeamName = (index: number): string => {
+  const marketing = marketingWords[Math.floor(Math.random() * marketingWords.length)];
+  const christmas = christmasWords[Math.floor(Math.random() * christmasWords.length)];
+  return `${marketing} ${christmas}`;
+};
+
 // Function to generate balanced teams from a list of players
 export const generateBalancedTeams = (players: PlayerWithSkill[]): GeneratedTeam[] => {
   if (players.length % 2 !== 0) {
@@ -25,7 +45,7 @@ export const generateBalancedTeams = (players: PlayerWithSkill[]): GeneratedTeam
     
     teams.push({
       id: crypto.randomUUID(),
-      name: `Tým ${i + 1}`,
+      name: generateTeamName(i),
       player1,
       player2,
       averageSkill: (player1.skillLevel + player2.skillLevel) / 2,
