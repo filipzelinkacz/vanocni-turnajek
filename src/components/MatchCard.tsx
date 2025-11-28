@@ -34,10 +34,10 @@ export const MatchCard = ({ match }: MatchCardProps) => {
   if (!teamA || !teamB) return null;
 
   const handleSave = () => {
-    const numA = parseInt(scoreA);
-    const numB = parseInt(scoreB);
+    const numA = scoreA === '' ? 0 : parseInt(scoreA);
+    const numB = scoreB === '' ? 0 : parseInt(scoreB);
 
-    if (isNaN(numA) || isNaN(numB) || numA < 0 || numB < 0) {
+    if (isNaN(numA) || isNaN(numB)) {
       toast.error('Neplatné skóre');
       return;
     }
