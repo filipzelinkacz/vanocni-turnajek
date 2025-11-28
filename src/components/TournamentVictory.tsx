@@ -20,11 +20,12 @@ export const TournamentVictory = () => {
     toast.info('Generuji PDF...');
 
     const opt = {
-      margin: 10,
+      margin: [10, 15, 10, 15] as [number, number, number, number],
       filename: `${tournament?.name || 'turnaj'}-vysledky.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' as const },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
     try {
@@ -72,7 +73,16 @@ export const TournamentVictory = () => {
         </Button>
       </div>
 
-      <div id="victory-content" className="space-y-8">
+      <div id="victory-content" className="space-y-6 max-w-[1400px] mx-auto">
+        <style>{`
+          @media print {
+            #victory-content { 
+              max-width: 100% !important;
+              padding: 20px;
+            }
+            .grid { page-break-inside: avoid; }
+          }
+        `}</style>
       {/* Victory Banner */}
       <Card className="relative overflow-hidden bg-gradient-to-br from-accent/20 via-primary/10 to-accent/20 border-accent/30">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
@@ -138,54 +148,61 @@ export const TournamentVictory = () => {
       </div>
 
       {/* Tournament Statistics */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="p-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
             <Target className="w-6 h-6 text-primary" />
-            <h3 className="text-lg font-bold text-primary">Celkem zápasů</h3>
+            <h3 className="text-base font-bold text-primary">Celkem zápasů</h3>
           </div>
-          <div className="text-4xl font-bold text-accent">{totalMatches}</div>
+          <div className="text-3xl font-bold text-accent">{totalMatches}</div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
             <TrendingUp className="w-6 h-6 text-primary" />
-            <h3 className="text-lg font-bold text-primary">Celkem gólů</h3>
+            <h3 className="text-base font-bold text-primary">Celkem gólů</h3>
           </div>
-          <div className="text-4xl font-bold text-accent">{totalGoals}</div>
+          <div className="text-3xl font-bold text-accent">{totalGoals}</div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
             <Award className="w-6 h-6 text-primary" />
-            <h3 className="text-lg font-bold text-primary">Průměr gólů/zápas</h3>
+            <h3 className="text-base font-bold text-primary">Průměr gólů/zápas</h3>
           </div>
-          <div className="text-4xl font-bold text-accent">
+          <div className="text-3xl font-bold text-accent">
             {totalMatches > 0 ? (totalGoals / totalMatches).toFixed(1) : 0}
           </div>
         </Card>
       </div>
 
-      {/* Match Highlights */}
-      <MatchHighlights />
+      {/* Two Column Layout for Better PDF */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          {/* Match Highlights */}
+          <MatchHighlights />
+          
+          {/* Prediction Results */}
+          <PredictionResults />
+        </div>
 
-      {/* Prediction Results */}
-      <PredictionResults />
-
-      {/* All Matches Results */}
-      <AllMatchesResults />
-
-      {/* Goal Statistics */}
-      <GoalStats />
-
-      {/* Final Standings */}
-      <div>
-        <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
-          <Trophy className="w-6 h-6" />
-          Konečná tabulka skupinové části
-        </h2>
-        <StandingsTable />
+        <div className="space-y-6">
+          {/* Goal Statistics */}
+          <GoalStats />
+          
+          {/* Final Standings */}
+          <div>
+            <h2 className="text-xl font-bold text-primary mb-4 flex items-center gap-2">
+              <Trophy className="w-5 h-5" />
+              Konečná tabulka
+            </h2>
+            <StandingsTable />
+          </div>
+        </div>
       </div>
+
+      {/* All Matches Results - Full Width */}
+      <AllMatchesResults />
       </div>
 
       {/* Archive Button */}
