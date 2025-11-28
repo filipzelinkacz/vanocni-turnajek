@@ -2,6 +2,12 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Tournament, Team, Match, TournamentFormat, TeamStats } from '@/types/tournament';
 import { generateMatches, calculateStandings } from '@/lib/tournament-utils';
 
+export interface Prediction {
+  playerName: string;
+  predictedTeamId: string;
+  timestamp: string;
+}
+
 interface TournamentContextType {
   tournament: Tournament | null;
   historicalTournaments: Tournament[];
@@ -23,6 +29,9 @@ interface TournamentContextType {
   advanceToFinals: () => void;
   canAdvanceToFinals: boolean;
   isTournamentFinished: boolean;
+  predictions: Prediction[];
+  addPrediction: (playerName: string, predictedTeamId: string) => void;
+  canMakePredictions: boolean;
 }
 
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
@@ -30,11 +39,13 @@ const TournamentContext = createContext<TournamentContextType | undefined>(undef
 const STORAGE_KEY = 'foosball-tournament';
 const HISTORY_KEY = 'foosball-tournament-history';
 const STANDINGS_KEY = 'foosball-previous-standings';
+const PREDICTIONS_KEY = 'foosball-predictions';
 
 export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [historicalTournaments, setHistoricalTournaments] = useState<Tournament[]>([]);
   const [previousStandings, setPreviousStandings] = useState<TeamStats[]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
 
   // Load from localStorage
   useEffect(() => {
@@ -52,6 +63,11 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     if (prevStandings) {
       setPreviousStandings(JSON.parse(prevStandings));
     }
+
+    const storedPredictions = localStorage.getItem(PREDICTIONS_KEY);
+    if (storedPredictions) {
+      setPredictions(JSON.parse(storedPredictions));
+    }
   }, []);
 
   // Save to localStorage
@@ -64,6 +80,10 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(historicalTournaments));
   }, [historicalTournaments]);
+
+  useEffect(() => {
+    localStorage.setItem(PREDICTIONS_KEY, JSON.stringify(predictions));
+  }, [predictions]);
 
   const createTournament = (name: string, format: TournamentFormat, teams: Team[]) => {
     const matches = generateMatches(teams, format);
@@ -164,10 +184,25 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
     setTournament(null);
     setHistoricalTournaments([]);
     setPreviousStandings([]);
+    setPredictions([]);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(HISTORY_KEY);
     localStorage.removeItem(STANDINGS_KEY);
+    localStorage.removeItem(PREDICTIONS_KEY);
   };
+
+  const addPrediction = (playerName: string, predictedTeamId: string) => {
+    const newPrediction: Prediction = {
+      playerName,
+      predictedTeamId,
+      timestamp: new Date().toISOString(),
+    };
+    setPredictions([...predictions, newPrediction]);
+  };
+
+  const canMakePredictions = tournament 
+    ? tournament.matches.every(m => m.status === 'scheduled')
+    : false;
   
   const endTournamentEarly = () => {
     if (!tournament) return;
@@ -311,6 +346,9 @@ export const TournamentProvider = ({ children }: { children: ReactNode }) => {
         advanceToFinals,
         canAdvanceToFinals,
         isTournamentFinished,
+        predictions,
+        addPrediction,
+        canMakePredictions,
       }}
     >
       {children}
