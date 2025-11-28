@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TournamentProvider } from "./contexts/TournamentContext";
 import { Navigation } from "./components/Navigation";
 import { PasswordProtection } from "./components/PasswordProtection";
+import { ChristmasSnow } from "./components/ChristmasSnow";
 import Dashboard from "./pages/Dashboard";
 import Setup from "./pages/Setup";
 import Scores from "./pages/Scores";
@@ -20,12 +21,25 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showChristmas, setShowChristmas] = useState(false);
 
   useEffect(() => {
     const auth = localStorage.getItem('fotbalek-auth');
     if (auth === 'true') {
       setIsAuthenticated(true);
     }
+
+    const christmasMode = localStorage.getItem('christmas-mode');
+    setShowChristmas(christmasMode === 'true');
+
+    const handleChristmasChange = (e: CustomEvent<boolean>) => {
+      setShowChristmas(e.detail);
+    };
+
+    window.addEventListener('christmas-mode-change', handleChristmasChange as EventListener);
+    return () => {
+      window.removeEventListener('christmas-mode-change', handleChristmasChange as EventListener);
+    };
   }, []);
 
   if (!isAuthenticated) {
@@ -46,6 +60,7 @@ const App = () => {
         <TournamentProvider>
           <Toaster />
           <Sonner />
+          {showChristmas && <ChristmasSnow />}
           <BrowserRouter>
             <Navigation />
             <Routes>
